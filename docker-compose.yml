@@ -1,0 +1,108 @@
+version: "3.9"
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: smarthire-mysql
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: Rishabh@1305
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+  auth-service:
+    build: ./auth-service
+
+    container_name: auth-service
+
+    depends_on:
+      - mysql
+
+    ports:
+      - "8081:8081"
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/auth_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Rishabh@1305
+
+  job-service:
+    build: ./job-service
+
+    container_name: job-service
+
+    depends_on:
+      - mysql
+
+    ports:
+      - "8082:8082"
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/job_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Rishabh@1305
+
+  candidate-service:
+    build: ./candidate-service
+
+    container_name: candidate-service
+
+    depends_on:
+      - mysql
+
+    ports:
+      - "8083:8083"
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/candidate_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Rishabh@1305
+
+  application-service:
+    build: ./application-service
+
+    container_name: application-service
+
+    depends_on:
+      - mysql
+
+    ports:
+      - "8084:8084"
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/application_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Rishabh@1305
+
+  ai-service:
+    build: ./ai-service
+
+    container_name: ai-service
+
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./smart-hire-frontend/smart-hire-frontend
+
+    container_name: smart-hire-frontend
+
+    depends_on:
+      - auth-service
+      - job-service
+      - candidate-service
+      - application-service
+      - ai-service
+
+    ports:
+      - "3000:80"
+
+volumes:
+  mysql-data:
