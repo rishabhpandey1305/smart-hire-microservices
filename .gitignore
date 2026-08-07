@@ -1,0 +1,25 @@
+# Environment files
+.env
+
+# macOS
+.DS_Store
+
+# Docker
+*.log
+
+# IntelliJ
+.idea/
+
+# VS Code
+.vscode/
+
+# Maven
+**/target/
+
+# Python
+**/__pycache__/
+**/.venv/
+
+# Node
+**/node_modules/
+**/dist/

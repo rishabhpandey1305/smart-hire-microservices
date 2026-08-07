@@ -1,14 +1,12 @@
-version: "3.9"
-
 services:
 
   mysql:
     image: mysql:8.0
     container_name: smarthire-mysql
-    restart: always
+    restart: unless-stopped
 
     environment:
-      MYSQL_ROOT_PASSWORD: Rishabh@1305
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
     ports:
       - "3307:3306"
@@ -17,82 +15,103 @@ services:
       - mysql-data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
 
-  auth-service:
-    build: ./auth-service
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
+  auth-service:
+    build: ./backend/auth-service
     container_name: auth-service
+    restart: unless-stopped
 
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
     ports:
       - "8081:8081"
 
     environment:
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/auth_db
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Rishabh@1305
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
 
   job-service:
-    build: ./job-service
-
+    build: ./backend/job-service
     container_name: job-service
+    restart: unless-stopped
 
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
     ports:
       - "8082:8082"
 
     environment:
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/job_db
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Rishabh@1305
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
   candidate-service:
-    build: ./candidate-service
-
+    build: ./backend/candidate-service
     container_name: candidate-service
+    restart: unless-stopped
 
+    volumes:
+
+      - ./uploads:/app/uploads
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
     ports:
       - "8083:8083"
 
     environment:
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/candidate_db
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Rishabh@1305
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
   application-service:
-    build: ./application-service
-
+    build: ./backend/application-service
     container_name: application-service
+    restart: unless-stopped
 
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
     ports:
       - "8084:8084"
 
     environment:
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/application_db
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Rishabh@1305
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
   ai-service:
-    build: ./ai-service
-
+    build: ./backend/ai-service
     container_name: ai-service
+    restart: unless-stopped
 
     ports:
       - "8000:8000"
 
-  frontend:
-    build: ./smart-hire-frontend/smart-hire-frontend
+    environment:
+      PYTHONUNBUFFERED: "1"
 
+  frontend:
+    build: ./frontend/smart-hire-frontend/smart-hire-frontend
     container_name: smart-hire-frontend
+    restart: unless-stopped
 
     depends_on:
       - auth-service
