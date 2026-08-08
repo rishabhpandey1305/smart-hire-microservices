@@ -33,4 +33,7 @@ public class CandidateRequest {
 
     @NotBlank(message = "Skills are required")
     private String skills;
+
+    // Optional: set automatically after resume upload
+    private String resumeUrl;
 }

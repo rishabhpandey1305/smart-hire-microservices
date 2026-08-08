@@ -18,7 +18,7 @@ public class Candidate {
 
     private String name;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String phone;
