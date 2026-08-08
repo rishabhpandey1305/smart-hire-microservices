@@ -35,8 +35,7 @@ public class AuthService {
 
     public String register(RegisterRequest request) {
 
-        logger.info("Registration request received for email: {}",
-                request.getEmail());
+        logger.info("Registration request received for email: {}", request.getEmail());
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already registered");
@@ -51,21 +50,18 @@ public class AuthService {
 
         userRepository.save(user);
 
-        logger.info("User registered successfully: {}",
-                request.getEmail());
+        logger.info("User registered successfully: {}", request.getEmail());
 
         return "User Registered Successfully";
     }
 
     public LoginResponse login(LoginRequest request) {
 
-        logger.info("Login request received for email: {}",
-                request.getEmail());
+        logger.info("Login request received for email: {}", request.getEmail());
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
-                    logger.warn("Login failed. User not found: {}",
-                            request.getEmail());
+                    logger.warn("Login failed. User not found: {}", request.getEmail());
                     return new UserNotFoundException("User Not Found");
                 });
 
@@ -75,16 +71,13 @@ public class AuthService {
         );
 
         if (!matches) {
-            logger.warn("Login failed. Invalid password for: {}",
-                    request.getEmail());
-
+            logger.warn("Login failed. Invalid password for: {}", request.getEmail());
             throw new InvalidCredentialsException("Invalid Password");
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
 
-        logger.info("User logged in successfully: {}",
-                request.getEmail());
+        logger.info("User logged in successfully: {}", request.getEmail());
 
         return new LoginResponse(token);
     }

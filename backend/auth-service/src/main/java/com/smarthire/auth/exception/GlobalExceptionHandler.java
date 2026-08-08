@@ -2,28 +2,30 @@ package com.smarthire.auth.exception;
 
 import com.smarthire.auth.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleUserNotFound(
             UserNotFoundException ex,
             HttpServletRequest request) {
 
-        ApiResponse<Object> response = new ApiResponse<>(
-                false,
-                ex.getMessage(),
-                null,
-                LocalDateTime.now()
-        );
+        ApiResponse<Object> response = ApiResponse.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .data(null)
+                .build();
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
@@ -35,12 +37,11 @@ public class GlobalExceptionHandler {
             InvalidCredentialsException ex,
             HttpServletRequest request) {
 
-        ApiResponse<Object> response = new ApiResponse<>(
-                false,
-                ex.getMessage(),
-                null,
-                LocalDateTime.now()
-        );
+        ApiResponse<Object> response = ApiResponse.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .data(null)
+                .build();
 
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
@@ -59,12 +60,11 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .orElse("Validation failed");
 
-        ApiResponse<Object> response = new ApiResponse<>(
-                false,
-                message,
-                null,
-                LocalDateTime.now()
-        );
+        ApiResponse<Object> response = ApiResponse.builder()
+                .success(false)
+                .message(message)
+                .data(null)
+                .build();
 
         return ResponseEntity
                 .badRequest()
@@ -76,12 +76,13 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request) {
 
-        ApiResponse<Object> response = new ApiResponse<>(
-                false,
-                "An unexpected error occurred.",
-                null,
-                LocalDateTime.now()
-        );
+        logger.error("Unhandled exception", ex);
+
+        ApiResponse<Object> response = ApiResponse.builder()
+                .success(false)
+                .message("An unexpected error occurred")
+                .data(null)
+                .build();
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

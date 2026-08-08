@@ -14,10 +14,10 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(
                         new Info()
-                                .title("Smart Hire Application Service API")
-                                .version("1.0")
+                                .title("SmartHire Auth Service API")
+                                .version("1.0.0")
                                 .description(
-                                        "Application and Recruiter Dashboard APIs"
+                                        "Authentication and authorization APIs for SmartHire"
                                 )
                 );
     }
