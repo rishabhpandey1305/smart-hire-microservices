@@ -33,15 +33,31 @@ function Dashboard() {
     try {
       setLoading(true);
 
-      const [
-        jobsData,
-        applicationsData,
-        candidatesData,
-      ] = await Promise.all([
-        getJobs(),
-        getApplications(),
-        getCandidates(),
-      ]);
+      const [jobsResult, applicationsResult, candidatesResult] =
+        await Promise.allSettled([
+          getJobs(),
+          getApplications(),
+          getCandidates(),
+        ]);
+
+      const jobsData =
+        jobsResult.status === "fulfilled"
+          ? jobsResult.value
+          : [];
+
+      const applicationsData =
+        applicationsResult.status === "fulfilled"
+          ? applicationsResult.value
+          : [];
+
+      const candidatesData =
+        candidatesResult.status === "fulfilled"
+          ? candidatesResult.value
+          : [];
+
+      setJobs(jobsData);
+      setApplications(applicationsData);
+      setCandidates(candidatesData);
 
       setJobs(jobsData);
       setApplications(applicationsData);
