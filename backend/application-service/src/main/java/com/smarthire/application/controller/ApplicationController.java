@@ -4,7 +4,6 @@ import com.smarthire.application.dto.ApplicationRequest;
 import com.smarthire.application.dto.StatusRequest;
 import com.smarthire.application.entity.Application;
 import com.smarthire.application.service.ApplicationService;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +21,12 @@ public class ApplicationController {
     }
 
     @PostMapping
-    public String applyJob(
-            @Valid
-            @RequestBody ApplicationRequest request) {
-
+    public String applyJob(@Valid @RequestBody ApplicationRequest request) {
         return service.applyJob(request);
     }
 
     @GetMapping
     public List<Application> getAllApplications() {
-
         return service.getAllApplications();
     }
 
@@ -47,12 +42,9 @@ public class ApplicationController {
     public String updateStatus(
             @Positive(message = "Application ID must be positive")
             @PathVariable Long id,
-            @Valid
-            @RequestBody StatusRequest request) {
+            @Valid @RequestBody StatusRequest request) {
 
-        return service.updateStatus(
-                id,
-                request.getStatus());
+        return service.updateStatus(id, request.getStatus());
     }
 
     @DeleteMapping("/{id}")

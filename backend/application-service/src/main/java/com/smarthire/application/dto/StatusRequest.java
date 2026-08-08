@@ -11,8 +11,8 @@ public class StatusRequest {
 
     @NotBlank(message = "Status is required")
     @Pattern(
-            regexp = "APPLIED|SHORTLISTED|REJECTED|SELECTED",
-            message = "Status must be APPLIED, SHORTLISTED, REJECTED, or SELECTED"
+            regexp = "APPLIED|SHORTLISTED|INTERVIEW|REJECTED|SELECTED",
+            message = "Status must be APPLIED, SHORTLISTED, INTERVIEW, REJECTED, or SELECTED"
     )
     private String status;
 }
