@@ -14,7 +14,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:3000",
                         "http://localhost:5173",
-                        "https://smart-hire-microservices-iufo-gf4aw6zri.vercel.app"
+                        "https://smart-hire-microservices-iufo.vercel.app",
+                        "https://smart-hire-microservices-iufo-lmxsko23e.vercel.app"
                 )
                 .allowedMethods("*")
                 .allowedHeaders("*")
