@@ -26,51 +26,65 @@ function AIAnalysisCard({
     <div className="space-y-8">
 
       {/* Header */}
-
       <div className="text-center">
-
         <h1 className="text-3xl font-bold">
-          🤖 AI Resume Analysis
+          🤖 Gemini AI Resume Analysis
         </h1>
 
         <p className="text-slate-500 mt-2">
-          Resume parsed successfully.
+          Resume analyzed successfully.
         </p>
-
       </div>
 
       {/* Summary */}
-
       <div className="grid grid-cols-2 gap-5">
 
         <div className="bg-blue-50 rounded-xl p-6">
-
           <p className="text-slate-500">
             Skills Detected
           </p>
 
           <h2 className="text-4xl font-bold mt-2">
-            {analysis.skills.length}
+            {analysis.skills?.length || 0}
           </h2>
-
         </div>
 
         <div className="bg-purple-50 rounded-xl p-6">
-
           <p className="text-slate-500">
             Resume Length
           </p>
 
           <h2 className="text-4xl font-bold mt-2">
-            {analysis.resumeText.length}
+            {analysis.resumeText?.length || 0}
           </h2>
-
         </div>
 
       </div>
 
-      {/* Skills */}
+      {/* Gemini Insights */}
+      {analysis.overallScore !== undefined && (
+        <div className="grid grid-cols-2 gap-5">
 
+          <div className="bg-emerald-50 rounded-xl p-6">
+            <p className="text-slate-500">Overall Score</p>
+
+            <h2 className="text-4xl font-bold mt-2 text-emerald-600">
+              {analysis.overallScore}/100
+            </h2>
+          </div>
+
+          <div className="bg-indigo-50 rounded-xl p-6">
+            <p className="text-slate-500">Experience Level</p>
+
+            <h2 className="text-3xl font-bold mt-2 text-indigo-600">
+              {analysis.experienceLevel || "Unknown"}
+            </h2>
+          </div>
+
+        </div>
+      )}
+
+      {/* Skills */}
       <div>
 
         <h2 className="text-xl font-bold mb-4">
@@ -79,23 +93,62 @@ function AIAnalysisCard({
 
         <div className="flex flex-wrap gap-3">
 
-          {analysis.skills.map((skill) => (
-
+          {analysis.skills?.map((skill) => (
             <span
               key={skill}
               className="bg-blue-600 text-white px-4 py-2 rounded-full"
             >
               {skill}
             </span>
-
           ))}
 
         </div>
 
       </div>
 
-      {/* Resume */}
+      {/* Strengths & Weaknesses */}
+      <div className="grid md:grid-cols-2 gap-6">
 
+        <div className="bg-green-50 rounded-xl p-5">
+          <h3 className="font-bold text-green-700 mb-3">
+            💪 Strengths
+          </h3>
+
+          <ul className="space-y-2 text-sm">
+            {analysis.strengths?.map((item, index) => (
+              <li key={index}>• {item}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="bg-red-50 rounded-xl p-5">
+          <h3 className="font-bold text-red-700 mb-3">
+            ⚠️ Weaknesses
+          </h3>
+
+          <ul className="space-y-2 text-sm">
+            {analysis.weaknesses?.map((item, index) => (
+              <li key={index}>• {item}</li>
+            ))}
+          </ul>
+        </div>
+
+      </div>
+
+      {/* Gemini Recommendation */}
+      {analysis.recommendation && (
+        <div className="bg-blue-50 rounded-xl p-6">
+          <h3 className="font-bold text-blue-700 text-lg mb-3">
+            🤖 Gemini Recommendation
+          </h3>
+
+          <p className="leading-7 text-slate-700">
+            {analysis.recommendation}
+          </p>
+        </div>
+      )}
+
+      {/* Resume Preview */}
       <div>
 
         <h2 className="text-xl font-bold mb-4">
@@ -103,13 +156,12 @@ function AIAnalysisCard({
         </h2>
 
         <div className="bg-slate-100 rounded-xl p-5 max-h-72 overflow-y-auto whitespace-pre-wrap text-sm leading-7">
-          {analysis.resumeText}
+          {analysis.resumeText || "No text extracted"}
         </div>
 
       </div>
 
       {/* Match */}
-
       <div>
 
         <h2 className="text-xl font-bold mb-4">
@@ -127,7 +179,6 @@ function AIAnalysisCard({
         <div className="space-y-8 border rounded-2xl p-8">
 
           {/* Score */}
-
           <div className="text-center">
 
             <div
@@ -147,7 +198,6 @@ function AIAnalysisCard({
           </div>
 
           {/* Matched */}
-
           <div>
 
             <h3 className="font-bold text-lg mb-3">
@@ -156,15 +206,13 @@ function AIAnalysisCard({
 
             <div className="flex flex-wrap gap-2">
 
-              {matchResult.matchedSkills.map(skill => (
-
+              {matchResult.matchedSkills?.map(skill => (
                 <span
                   key={skill}
                   className="bg-green-100 text-green-700 px-4 py-2 rounded-full"
                 >
                   {skill}
                 </span>
-
               ))}
 
             </div>
@@ -172,7 +220,6 @@ function AIAnalysisCard({
           </div>
 
           {/* Missing */}
-
           <div>
 
             <h3 className="font-bold text-lg mb-3">
@@ -181,15 +228,13 @@ function AIAnalysisCard({
 
             <div className="flex flex-wrap gap-2">
 
-              {matchResult.missingSkills.map(skill => (
-
+              {matchResult.missingSkills?.map(skill => (
                 <span
                   key={skill}
                   className="bg-red-100 text-red-700 px-4 py-2 rounded-full"
                 >
                   {skill}
                 </span>
-
               ))}
 
             </div>
@@ -197,11 +242,10 @@ function AIAnalysisCard({
           </div>
 
           {/* Recommendation */}
-
           <div className="bg-slate-100 rounded-xl p-6">
 
             <h3 className="font-bold text-lg">
-              AI Recommendation
+              AI Match Recommendation
             </h3>
 
             <p className="mt-4 leading-7">
