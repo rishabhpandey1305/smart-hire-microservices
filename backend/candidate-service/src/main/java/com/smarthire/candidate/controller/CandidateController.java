@@ -6,7 +6,9 @@ import com.smarthire.candidate.service.CandidateService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,10 +72,25 @@ public class CandidateController {
 
         Candidate candidate = service.getCandidateById(id);
 
-        candidate.setResumeUrl(path.toString());
+        candidate.setResumeUrl(fileName);
 
         service.saveCandidate(candidate);
 
         return "Resume Uploaded Successfully";
+    }
+    @GetMapping("/resume/{fileName}")
+    public ResponseEntity<byte[]> getResume(@PathVariable String fileName) throws Exception
+    {
+        String uploadDir = System.getProperty("java.io.tmpdir") + "/resumes/";
+        Path path = Paths.get(uploadDir, fileName);
+        if (!Files.exists(path))
+        {
+            return ResponseEntity.notFound().build();
+        }
+        byte[] fileBytes = Files.readAllBytes(path);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(fileBytes);
     }
 }

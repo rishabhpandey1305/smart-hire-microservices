@@ -186,7 +186,7 @@ function Candidates() {
       setAnalysis(null);
       setMatchResult(null);
       const response = await fetch(
-        `http://localhost:8083/${candidate.resumeUrl}`
+        `${import.meta.env.VITE_CANDIDATE_BASE_URL}/candidates/resume/${candidate.resumeUrl}`
       );
       if (!response.ok) {
           throw new Error("Unable to fetch resume.");
