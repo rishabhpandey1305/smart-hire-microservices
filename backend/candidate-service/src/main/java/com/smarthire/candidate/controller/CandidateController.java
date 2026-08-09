@@ -5,7 +5,12 @@ import com.smarthire.candidate.entity.Candidate;
 import com.smarthire.candidate.service.CandidateService;
 import jakarta.validation.Valid;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -89,7 +94,7 @@ public class CandidateController {
         return "Resume Uploaded Successfully";
     }
 
-    // View / Download Resume
+    // View Resume
     @GetMapping("/resume/{fileName}")
     public ResponseEntity<byte[]> getResume(@PathVariable String fileName) throws Exception {
 
@@ -129,18 +134,21 @@ public class CandidateController {
                     .body("Resume file not found on server");
         }
 
-        FileSystemResource resource = new FileSystemResource(path.toFile());
+        RestTemplate restTemplate = new RestTemplate();
 
+        // Create file resource
+        FileSystemResource fileResource = new FileSystemResource(path.toFile());
+
+        // Build multipart body
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", resource);
+        body.add("file", fileResource);
 
+        // Set multipart headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity =
                 new HttpEntity<>(body, headers);
-
-        RestTemplate restTemplate = new RestTemplate();
 
         String aiUrl = "https://smarthire-ai-j8oj.onrender.com/parse-resume";
 
