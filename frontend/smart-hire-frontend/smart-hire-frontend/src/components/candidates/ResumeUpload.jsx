@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { uploadResume } from "@/services/candidateService";
@@ -7,10 +7,13 @@ function ResumeUpload({
   candidateId,
   onUploadSuccess,
 }) {
-  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
+  const fileInputRef = useRef(null);
+
   async function handleUpload() {
+    const file = fileInputRef.current?.files?.[0];
+
     if (!file) {
       toast.error("Please select a resume.");
       return;
@@ -23,11 +26,12 @@ function ResumeUpload({
 
       toast.success("Resume uploaded successfully.");
 
-      setFile(null);
+      fileInputRef.current.value = "";
 
       if (onUploadSuccess) {
-        onUploadSuccess();
+        await onUploadSuccess();
       }
+
     } catch (error) {
       console.error(error);
 
@@ -38,11 +42,11 @@ function ResumeUpload({
   }
 
   return (
-    <div className="mt-4 border-t pt-4">
+    <div>
       <input
+        ref={fileInputRef}
         type="file"
         accept=".pdf,.doc,.docx"
-        onChange={(e) => setFile(e.target.files[0])}
       />
 
       <button
