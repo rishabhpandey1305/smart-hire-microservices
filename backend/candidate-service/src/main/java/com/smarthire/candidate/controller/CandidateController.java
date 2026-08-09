@@ -58,14 +58,13 @@ public class CandidateController {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Please upload a resume file.");
         }
+        String uploadDir = System.getProperty("java.io.tmpdir") + "/resumes/";
 
-        String uploadDir = "uploads/resumes/";
+        Files.createDirectories(Paths.get(uploadDir));
 
         String fileName = id + "_" + file.getOriginalFilename();
 
         Path path = Paths.get(uploadDir, fileName);
-
-        Files.createDirectories(path.getParent());
 
         Files.write(path, file.getBytes());
 
