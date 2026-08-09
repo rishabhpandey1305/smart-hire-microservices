@@ -21,7 +21,7 @@ import {
   deleteCandidate,
 } from "@/services/candidateService";
 
-import { parseResume } from "@/services/aiService";
+// import { parseResume } from "@/services/aiService";
 
 function Candidates() {
   const [candidates, setCandidates] = useState([]);
@@ -170,52 +170,21 @@ function Candidates() {
   /* =======================================================
      AI RESUME ANALYSIS
   ======================================================= */
-
-  async function handleAnalyze(candidate) {
-    if (!candidate.resumeUrl) {
-      toast.error("Resume not uploaded.");
-
-      return;
-    }
-
-    try {
+  async function handleAnalyze(id) {
+      try {
       setAnalysisModal(true);
-
       setAnalysisLoading(true);
+      setAnalysis(null); setMatchResult(null);
+      const response = await fetch( `${import.meta.env.VITE_CANDIDATE_BASE_URL}/candidates/${id}/analyze`, {
+          method: "POST", } );
+          if (!response.ok) {
+              throw new Error("Unable to analyze resume.");
+              } const result = await response.json(); setAnalysis(result);
+          } catch (error) { console.error(error); toast.error("Unable to analyze resume.");
+              } finally { setAnalysisLoading(false);
+                  }
+              }
 
-      setAnalysis(null);
-      setMatchResult(null);
-      const response = await fetch(
-        `${import.meta.env.VITE_CANDIDATE_BASE_URL}/candidates/resume/${candidate.resumeUrl}`
-      );
-      if (!response.ok) {
-          throw new Error("Unable to fetch resume.");
-      }
-
-      const blob = await response.blob();
-
-      const file = new File(
-        [blob],
-        "resume.pdf",
-        {
-          type: "application/pdf",
-        }
-      );
-
-      const result =
-        await parseResume(file);
-
-      setAnalysis(result);
-    } catch (error) {
-      console.error(error);
-
-      toast.error(
-        "Unable to analyze resume."
-      );
-    } finally {
-      setAnalysisLoading(false);
-    }
-  }
   async function handleJobSelect(job) {
 
     if (!job) return;

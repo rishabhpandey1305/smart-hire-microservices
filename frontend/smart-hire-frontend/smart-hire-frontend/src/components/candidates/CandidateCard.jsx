@@ -122,7 +122,7 @@ function CandidateCard({
         <div className="flex flex-col gap-3 lg:w-56">
 
           <Button
-            onClick={() => onAnalyze(candidate)}
+            onClick={() => onAnalyze(candidate.id)}
             className="w-full"
           >
             🤖 Analyze Resume
