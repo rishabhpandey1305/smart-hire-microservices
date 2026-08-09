@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import JobHeader from "@/components/jobs/JobHeader";
 import JobSearch from "@/components/jobs/JobSearch";
@@ -12,8 +13,6 @@ import ErrorMessage from "@/components/common/ErrorMessage";
 import CandidateRankingModal from "@/components/ai/CandidateRankingModal";
 import CandidateRankingCard from "@/components/ai/CandidateRankingCard";
 
-import toast from "react-hot-toast";
-
 import {
   getJobs,
   createJob,
@@ -21,9 +20,7 @@ import {
   deleteJob,
 } from "@/services/jobService";
 
-import {
-  getCandidates,
-} from "@/services/candidateService";
+import { getCandidates } from "@/services/candidateService";
 
 import {
   matchCandidate,
@@ -31,7 +28,6 @@ import {
 } from "@/services/aiService";
 
 function Jobs() {
-
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
 
@@ -43,291 +39,182 @@ function Jobs() {
   const [error, setError] = useState("");
 
   const [showModal, setShowModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
 
-  const [selectedJob, setSelectedJob] =
-    useState(null);
-
-  /* ---------------- Ranking ---------------- */
-
-  const [rankingModal, setRankingModal] =
-    useState(false);
-
-  const [rankingLoading, setRankingLoading] =
-    useState(false);
-
-  const [rankings, setRankings] =
-    useState([]);
-
-  /* ----------------------------------------- */
+  // AI Ranking
+  const [rankingModal, setRankingModal] = useState(false);
+  const [rankingLoading, setRankingLoading] = useState(false);
+  const [rankings, setRankings] = useState([]);
 
   useEffect(() => {
     loadJobs();
   }, []);
 
   useEffect(() => {
-
     const query = search.toLowerCase();
 
-    const filtered = jobs.filter(job => {
-
+    const filtered = jobs.filter((job) => {
       return (
-        job.title.toLowerCase().includes(query) ||
-        job.location.toLowerCase().includes(query) ||
-        job.requiredSkills
+        (job.title || "")
+          .toLowerCase()
+          .includes(query) ||
+        (job.location || "")
+          .toLowerCase()
+          .includes(query) ||
+        (job.requiredSkills || "")
           .toLowerCase()
           .includes(query)
       );
-
     });
 
     setFilteredJobs(filtered);
-
   }, [jobs, search]);
 
   async function loadJobs() {
-
     try {
-
       setLoading(true);
 
-      const data =
-        await getJobs();
+      const data = await getJobs();
 
       setJobs(data);
-
       setFilteredJobs(data);
-
     } catch (error) {
-
       console.error(error);
-
-      setError(
-        "Unable to load jobs."
-      );
-
+      setError("Unable to load jobs.");
     } finally {
-
       setLoading(false);
-
     }
-
   }
 
   function handleCreate() {
-
     setSelectedJob(null);
-
     setShowModal(true);
-
   }
 
   function handleEdit(job) {
-
     setSelectedJob(job);
-
     setShowModal(true);
-
   }
 
   async function handleCreateJob(jobData) {
-
     try {
-
       setCreating(true);
 
       await createJob(jobData);
 
-      toast.success(
-        "Job created successfully."
-      );
+      toast.success("Job created successfully.");
 
       setShowModal(false);
 
       await loadJobs();
-
     } catch (error) {
-
       console.error(error);
-
-      toast.error(
-        "Unable to create job."
-      );
-
+      toast.error("Unable to create job.");
     } finally {
-
       setCreating(false);
-
     }
-
   }
 
   async function handleUpdateJob(jobData) {
-
     try {
-
       setCreating(true);
 
-      await updateJob(
-        selectedJob.id,
-        jobData
-      );
+      await updateJob(selectedJob.id, jobData);
 
-      toast.success(
-        "Job updated successfully."
-      );
+      toast.success("Job updated successfully.");
 
       setShowModal(false);
-
       setSelectedJob(null);
 
       await loadJobs();
-
     } catch (error) {
-
       console.error(error);
-
-      toast.error(
-        "Unable to update job."
-      );
-
+      toast.error("Unable to update job.");
     } finally {
-
       setCreating(false);
-
     }
-
   }
 
   async function handleDelete(id) {
-
-    const confirmed =
-      window.confirm(
-        "Delete this job?"
-      );
+    const confirmed = window.confirm(
+      "Delete this job?"
+    );
 
     if (!confirmed) return;
 
     try {
-
       await deleteJob(id);
 
-      toast.success(
-        "Job deleted successfully."
-      );
+      toast.success("Job deleted successfully.");
 
       await loadJobs();
-
     } catch (error) {
-
       console.error(error);
-
-      toast.error(
-        "Unable to delete job."
-      );
-
+      toast.error("Unable to delete job.");
     }
-
   }
 
-  /* ==========================================
-      AI Candidate Ranking
-  ========================================== */
-
+  // AI Candidate Ranking
   async function handleRank(job) {
-
     try {
-
       setRankingModal(true);
-
       setRankingLoading(true);
-
       setRankings([]);
 
-      const candidates =
-        await getCandidates();
+      const candidates = await getCandidates();
 
-      const jobSkills =
-        job.requiredSkills
-          .split(",")
-          .map(skill => skill.trim());
+      const jobSkills = (job.requiredSkills || "")
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean);
 
-      const rankingInput = [];
-
-      for (const candidate of candidates) {
-
-        const candidateSkills =
-          candidate.skills
+      const rankingInput = await Promise.all(
+        candidates.map(async (candidate) => {
+          const candidateSkills = (candidate.skills || "")
             .split(",")
-            .map(skill => skill.trim());
+            .map((skill) => skill.trim())
+            .filter(Boolean);
 
-        const result =
-          await matchCandidate(
+          const result = await matchCandidate(
             candidateSkills,
             jobSkills
           );
 
-        rankingInput.push({
-          name: candidate.name,
-          matchScore:
-            result.matchScore,
-        });
-
-      }
-
-      const ranked =
-        await rankCandidates(
-          rankingInput
-        );
-
-      setRankings(ranked);
-
-    } catch (error) {
-
-      console.error(error);
-
-      toast.error(
-        "Unable to rank candidates."
+          return {
+            name: candidate.name,
+            matchScore: result.matchScore,
+          };
+        })
       );
 
+      const ranked =
+        await rankCandidates(rankingInput);
+
+      setRankings(ranked);
+    } catch (error) {
+      console.error(error);
+      toast.error("Unable to rank candidates.");
     } finally {
-
       setRankingLoading(false);
-
     }
-
   }
 
-  /* ========================================== */
-
   if (loading) {
-
     return (
-      <Loading
-        message="Loading Jobs..."
-      />
+      <Loading message="Loading Jobs..." />
     );
-
   }
 
   if (error) {
-
     return (
-      <ErrorMessage
-        message={error}
-      />
+      <ErrorMessage message={error} />
     );
-
   }
 
   return (
-
     <>
-
       <div className="space-y-6">
-
-        <JobHeader
-          onCreate={handleCreate}
-        />
+        <JobHeader onCreate={handleCreate} />
 
         <JobSearch
           value={search}
@@ -340,17 +227,13 @@ function Jobs() {
           onDelete={handleDelete}
           onRank={handleRank}
         />
-
       </div>
 
       <JobModal
         isOpen={showModal}
         onClose={() => {
-
           setShowModal(false);
-
           setSelectedJob(null);
-
         }}
         title={
           selectedJob
@@ -358,7 +241,6 @@ function Jobs() {
             : "Create Job"
         }
       >
-
         <JobForm
           initialData={selectedJob}
           onSubmit={
@@ -368,7 +250,6 @@ function Jobs() {
           }
           loading={creating}
         />
-
       </JobModal>
 
       <CandidateRankingModal
@@ -377,11 +258,8 @@ function Jobs() {
           setRankingModal(false)
         }
       >
-
         {rankingLoading ? (
-
           <div className="py-16 text-center">
-
             <h2 className="text-2xl font-bold">
               🤖 AI Ranking Candidates...
             </h2>
@@ -390,23 +268,15 @@ function Jobs() {
               Comparing candidates with
               job requirements...
             </p>
-
           </div>
-
         ) : (
-
           <CandidateRankingCard
             rankings={rankings}
           />
-
         )}
-
       </CandidateRankingModal>
-
     </>
-
   );
-
 }
 
 export default Jobs;

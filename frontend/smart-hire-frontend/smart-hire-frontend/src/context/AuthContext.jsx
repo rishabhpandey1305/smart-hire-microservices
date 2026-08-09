@@ -14,8 +14,6 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const storedToken = getToken();
 
-    console.log("Stored Token:", storedToken);
-
     if (storedToken) {
       setToken(storedToken);
     }
@@ -24,7 +22,6 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (jwt) => {
-      console.log("Saving token:", jwt);
     saveToken(jwt);
     setToken(jwt);
   };

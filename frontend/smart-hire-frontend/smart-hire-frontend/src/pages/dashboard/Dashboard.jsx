@@ -59,10 +59,6 @@ function Dashboard() {
       setApplications(applicationsData);
       setCandidates(candidatesData);
 
-      setJobs(jobsData);
-      setApplications(applicationsData);
-      setCandidates(candidatesData);
-
     } catch (err) {
 
       console.error(err);
