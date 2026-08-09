@@ -22,7 +22,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:3000",
         "https://smart-hire-microservices-iufo-lmxsko23e.vercel.app",
-        "https://smart-hire-microservices-iufo.vercel.app"
+        "https://smart-hire-microservices-iufo.vercel.app",
+        "https://smart-hire-microservices-1-57uq.onrender.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],

@@ -15,7 +15,8 @@ public class CorsConfig implements WebMvcConfigurer {
                         "http://localhost:3000",
                         "http://localhost:5173",
                         "https://smart-hire-microservices-iufo.vercel.app",
-                        "https://smart-hire-microservices-iufo-lmxsko23e.vercel.app"
+                        "https://smart-hire-microservices-iufo-lmxsko23e.vercel.app",
+                        "https://smart-hire-microservices-1-57uq.onrender.com"
                 )
                 .allowedMethods("*")
                 .allowedHeaders("*")
